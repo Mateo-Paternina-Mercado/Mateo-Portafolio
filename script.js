@@ -187,32 +187,131 @@ document.querySelectorAll(".project-card, .skill-category, .contact-method").for
   animateOnScroll.observe(el)
 })
 
-// Contact form handling
+// EmailJS Configuration
+const emailjs = window.emailjs // Declare the emailjs variable
+;(() => {
+  emailjs.init("YOUR_PUBLIC_KEY") // Reemplaza con tu clave pública de EmailJS
+})()
+
+// Contact form handling with EmailJS
 const contactForm = document.getElementById("contactForm")
 if (contactForm) {
-  contactForm.addEventListener("submit", function (e) {
+  contactForm.addEventListener("submit", async function (e) {
     e.preventDefault()
 
+    const submitBtn = this.querySelector('button[type="submit"]')
+    const formStatus = document.getElementById("formStatus") || createFormStatus()
     const formData = new FormData(this)
-    const name = formData.get("name")
-    const email = formData.get("email")
-    const message = formData.get("message")
 
-    // Create mailto link
-    const subject = encodeURIComponent(`Mensaje de ${name} desde tu portafolio`)
-    const body = encodeURIComponent(`Nombre: ${name}\nEmail: ${email}\n\nMensaje:\n${message}`)
-    const mailtoLink = `mailto:paterninamercadomateo8@gmail.com?subject=${subject}&body=${body}`
+    // Disable submit button and show loading
+    submitBtn.disabled = true
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'
+    showFormStatus("Enviando mensaje...", "loading")
 
-    // Open email client
-    window.location.href = mailtoLink
+    try {
+      // Send email using EmailJS
+      const result = await emailjs.send(
+        "YOUR_SERVICE_ID", // Reemplaza con tu Service ID
+        "YOUR_TEMPLATE_ID", // Reemplaza con tu Template ID
+        {
+          from_name: formData.get("name"),
+          from_email: formData.get("email"),
+          message: formData.get("message"),
+          to_email: "paterninamercadomateo8@gmail.com",
+        },
+      )
 
-    // Reset form
-    this.reset()
+      if (result.status === 200) {
+        showFormStatus("¡Mensaje enviado exitosamente! Te responderé pronto.", "success")
+        this.reset()
 
-    // Show success message
-    showNotification("¡Mensaje enviado! Se abrirá tu cliente de email.", "success")
+        // Add success animation
+        contactForm.style.transform = "scale(1.02)"
+        setTimeout(() => {
+          contactForm.style.transform = "scale(1)"
+        }, 200)
+      }
+    } catch (error) {
+      console.error("Error sending email:", error)
+      showFormStatus("Error al enviar el mensaje. Por favor, intenta de nuevo o contáctame directamente.", "error")
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Mensaje'
+    }
   })
 }
+
+// Create form status element if it doesn't exist
+function createFormStatus() {
+  const formStatus = document.createElement("div")
+  formStatus.id = "formStatus"
+  formStatus.className = "form-status"
+  contactForm.appendChild(formStatus)
+  return formStatus
+}
+
+// Show form status with animation
+function showFormStatus(message, type) {
+  const formStatus = document.getElementById("formStatus") || createFormStatus()
+  formStatus.textContent = message
+  formStatus.className = `form-status ${type} show`
+
+  // Hide after 5 seconds for success/error messages
+  if (type !== "loading") {
+    setTimeout(() => {
+      formStatus.classList.remove("show")
+    }, 5000)
+  }
+}
+
+// Enhanced project cards animation
+const projectObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add("animate-in")
+        }, index * 200)
+      }
+    })
+  },
+  {
+    threshold: 0.2,
+    rootMargin: "0px 0px -50px 0px",
+  },
+)
+
+// Observe project cards for staggered animation
+document.querySelectorAll(".project-card").forEach((card) => {
+  projectObserver.observe(card)
+})
+
+// Add dynamic hover effects to project cards
+document.querySelectorAll(".project-card").forEach((card, index) => {
+  card.addEventListener("mouseenter", function () {
+    // Add subtle rotation based on card position
+    const rotation = index % 2 === 0 ? "rotateY(5deg)" : "rotateY(-5deg)"
+    this.style.transform = `translateY(-15px) rotateX(5deg) ${rotation}`
+
+    // Add glow effect to nearby cards
+    const allCards = document.querySelectorAll(".project-card")
+    allCards.forEach((otherCard, otherIndex) => {
+      if (Math.abs(index - otherIndex) === 1) {
+        otherCard.style.boxShadow = "0 5px 15px rgba(0, 255, 136, 0.1)"
+      }
+    })
+  })
+
+  card.addEventListener("mouseleave", function () {
+    this.style.transform = ""
+
+    // Remove glow from nearby cards
+    document.querySelectorAll(".project-card").forEach((otherCard) => {
+      otherCard.style.boxShadow = ""
+    })
+  })
+})
 
 // Notification system
 function showNotification(message, type = "info") {
@@ -335,6 +434,3 @@ console.log(`
     ║                                      ║
     ╚══════════════════════════════════════╝
 `)
-
-
-
