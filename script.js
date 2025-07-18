@@ -190,7 +190,7 @@ document.querySelectorAll(".project-card, .skill-category, .contact-method").for
 // EmailJS Configuration
 const emailjs = window.emailjs // Declare the emailjs variable
 ;(() => {
-  emailjs.init("YOUR_PUBLIC_KEY") // Reemplaza con tu clave pública de EmailJS
+  emailjs.init("dTZy4K-DSOVrpZ_jG") // Reemplaza con tu clave pública de EmailJS
 })()
 
 // Contact form handling with EmailJS
@@ -211,8 +211,8 @@ if (contactForm) {
     try {
       // Send email using EmailJS
       const result = await emailjs.send(
-        "YOUR_SERVICE_ID", // Reemplaza con tu Service ID
-        "YOUR_TEMPLATE_ID", // Reemplaza con tu Template ID
+        "service_drkdb3j", // Reemplaza con tu Service ID
+        "template_budtlc8", // Reemplaza con tu Template ID
         {
           from_name: formData.get("name"),
           from_email: formData.get("email"),
