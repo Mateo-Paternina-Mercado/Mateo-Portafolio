@@ -190,7 +190,7 @@ document.querySelectorAll(".project-card, .skill-category, .contact-method").for
 // EmailJS Configuration
 const emailjs = window.emailjs // Declare the emailjs variable
 ;(() => {
-  emailjs.init("dTZy4K-DSOVrpZ_jG") // Reemplaza con tu clave pública de EmailJS
+  emailjs.init("YOUR_PUBLIC_KEY") // Reemplaza con tu clave pública de EmailJS
 })()
 
 // Contact form handling with EmailJS
@@ -211,8 +211,8 @@ if (contactForm) {
     try {
       // Send email using EmailJS
       const result = await emailjs.send(
-        "service_drkdb3j", // Reemplaza con tu Service ID
-        "template_budtlc8", // Reemplaza con tu Template ID
+        "YOUR_SERVICE_ID", // Reemplaza con tu Service ID
+        "YOUR_TEMPLATE_ID", // Reemplaza con tu Template ID
         {
           from_name: formData.get("name"),
           from_email: formData.get("email"),
@@ -415,6 +415,508 @@ setInterval(addRandomGlitch, 10000)
 // Add loading animation
 window.addEventListener("load", () => {
   document.body.classList.add("loaded")
+})
+
+// Epic Loader
+let loaderProgress = 0
+const loader = document.getElementById("epic-loader")
+const progressBar = document.querySelector(".loader-progress")
+const percentage = document.querySelector(".loader-percentage")
+const tips = document.querySelectorAll(".tip")
+let currentTip = 0
+
+function updateLoader() {
+  loaderProgress += Math.random() * 15 + 5
+  if (loaderProgress > 100) loaderProgress = 100
+
+  progressBar.style.width = loaderProgress + "%"
+  percentage.textContent = Math.floor(loaderProgress) + "%"
+
+  if (loaderProgress < 100) {
+    setTimeout(updateLoader, 200 + Math.random() * 300)
+  } else {
+    setTimeout(() => {
+      loader.classList.add("hidden")
+      document.body.classList.add("loaded")
+    }, 500)
+  }
+}
+
+function rotateTips() {
+  tips[currentTip].classList.remove("active")
+  currentTip = (currentTip + 1) % tips.length
+  tips[currentTip].classList.add("active")
+}
+
+// Start loader
+setTimeout(updateLoader, 500)
+setInterval(rotateTips, 2000)
+
+// Matrix Mode
+const matrixBtn = document.getElementById("matrix-btn")
+let matrixMode = false
+
+matrixBtn.addEventListener("click", toggleMatrixMode)
+
+function toggleMatrixMode() {
+  matrixMode = !matrixMode
+  document.body.classList.toggle("matrix-mode", matrixMode)
+  matrixBtn.classList.toggle("active", matrixMode)
+
+  if (matrixMode) {
+    createMatrixRain()
+  } else {
+    clearMatrixRain()
+  }
+}
+
+function createMatrixRain() {
+  const canvas = document.createElement("canvas")
+  canvas.id = "matrix-canvas"
+  canvas.style.position = "fixed"
+  canvas.style.top = "0"
+  canvas.style.left = "0"
+  canvas.style.width = "100%"
+  canvas.style.height = "100%"
+  canvas.style.zIndex = "-1"
+  canvas.style.pointerEvents = "none"
+  document.body.appendChild(canvas)
+
+  const ctx = canvas.getContext("2d")
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}"
+  const matrixArray = matrix.split("")
+
+  const fontSize = 10
+  const columns = canvas.width / fontSize
+  const drops = []
+
+  for (let x = 0; x < columns; x++) {
+    drops[x] = 1
+  }
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.04)"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    ctx.fillStyle = "#00ff00"
+    ctx.font = fontSize + "px monospace"
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = matrixArray[Math.floor(Math.random() * matrixArray.length)]
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize)
+
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0
+      }
+      drops[i]++
+    }
+  }
+
+  const matrixInterval = setInterval(() => {
+    if (!matrixMode) {
+      clearInterval(matrixInterval)
+      return
+    }
+    drawMatrix()
+  }, 35)
+}
+
+function clearMatrixRain() {
+  const matrixCanvas = document.getElementById("matrix-canvas")
+  if (matrixCanvas) {
+    matrixCanvas.remove()
+  }
+}
+
+// Terminal
+const terminal = document.getElementById("terminal")
+const terminalInput = document.getElementById("terminal-input")
+const terminalOutput = document.getElementById("terminal-output")
+const openTerminalBtn = document.getElementById("open-terminal")
+
+const commands = {
+  help: () => `Comandos disponibles:
+- about: Información sobre mí
+- projects: Lista de proyectos
+- skills: Mis habilidades técnicas
+- contact: Información de contacto
+- clear: Limpiar terminal
+- matrix: Activar/desactivar modo Matrix
+- game: Abrir juego Snake
+- github: Ver perfil de GitHub
+- blog: Ir a la sección blog
+- exit: Cerrar terminal`,
+
+  about: () => `Soy Mateo Paternina, desarrollador Full Stack apasionado por crear soluciones innovadoras.
+Me especializo en JavaScript, React, Node.js y bases de datos.
+¡Siempre buscando nuevos desafíos!`,
+
+  projects: () => `Mis proyectos principales:
+1. Dragon Ball Super D&D Character Creator - JavaScript, HTML5, CSS3
+2. Proyecto Arcade - React, Node.js, MongoDB  
+3. Concesionaria Virtual - Next.js, TypeScript, PostgreSQL`,
+
+  skills: () => `Tecnologías que domino:
+Frontend: HTML5, CSS3, JavaScript, React
+Backend: Node.js, Python, MongoDB, PostgreSQL
+Herramientas: Git, Docker, AWS, Figma`,
+
+  contact: () => `¿Quieres contactarme?
+📧 Email: paterninamercadomateo8@gmail.com
+🐙 GitHub: github.com/Mateo-Paternina-Mercado
+📷 Instagram: @matt.pame`,
+
+  clear: () => "CLEAR",
+
+  matrix: () => {
+    toggleMatrixMode()
+    return matrixMode ? "Modo Matrix activado 🟢" : "Modo Matrix desactivado ❌"
+  },
+
+  game: () => {
+    openSnakeGame()
+    return "Abriendo Snake Game... 🐍"
+  },
+
+  github: () => {
+    window.open("https://github.com/Mateo-Paternina-Mercado", "_blank")
+    return "Abriendo GitHub... 🚀"
+  },
+
+  blog: () => {
+    document.getElementById("blog").scrollIntoView({ behavior: "smooth" })
+    return "Navegando al blog... 📝"
+  },
+
+  exit: () => "EXIT",
+}
+
+openTerminalBtn.addEventListener("click", openTerminal)
+
+function openTerminal() {
+  terminal.classList.add("active")
+  terminalInput.focus()
+}
+
+function closeTerminal() {
+  terminal.classList.remove("active")
+}
+
+terminalInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const command = terminalInput.value.trim().toLowerCase()
+    const output =
+      commands[command] || `Comando no encontrado: ${command}. Escribe 'help' para ver comandos disponibles.`
+
+    // Add command to output
+    const commandLine = document.createElement("div")
+    commandLine.className = "terminal-line"
+    commandLine.innerHTML = `<span class="terminal-prompt">mateo@portfolio:~$</span><span class="terminal-text">${terminalInput.value}</span>`
+    terminalOutput.appendChild(commandLine)
+
+    if (output === "CLEAR") {
+      terminalOutput.innerHTML = ""
+    } else if (output === "EXIT") {
+      closeTerminal()
+    } else {
+      const outputLine = document.createElement("div")
+      outputLine.className = "terminal-line"
+      outputLine.innerHTML = `<span class="terminal-text">${output}</span>`
+      terminalOutput.appendChild(outputLine)
+    }
+
+    terminalInput.value = ""
+    terminalOutput.scrollTop = terminalOutput.scrollHeight
+  }
+})
+
+// Close terminal with Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && terminal.classList.contains("active")) {
+    closeTerminal()
+  }
+  if (e.key === "t" || e.key === "T") {
+    if (!terminal.classList.contains("active")) {
+      openTerminal()
+    }
+  }
+  if (e.key === "m" || e.key === "M") {
+    toggleMatrixMode()
+  }
+})
+
+// Snake Game
+const miniGame = document.getElementById("mini-game")
+const gameCanvas = document.getElementById("game-canvas")
+const gameScore = document.getElementById("game-score")
+const playSnakeBtn = document.getElementById("play-snake")
+const gameCloseBtn = document.getElementById("game-close")
+
+const game = {
+  canvas: gameCanvas,
+  ctx: gameCanvas.getContext("2d"),
+  snake: [{ x: 200, y: 200 }],
+  direction: { x: 0, y: 0 },
+  food: { x: 0, y: 0 },
+  score: 0,
+  running: false,
+  paused: false,
+}
+
+playSnakeBtn.addEventListener("click", openSnakeGame)
+gameCloseBtn.addEventListener("click", closeSnakeGame)
+
+// Game controls - FIXED VERSION
+document.addEventListener("keydown", (e) => {
+  // Solo procesar controles si el juego está activo
+  if (!miniGame.classList.contains("active")) return
+
+  if (!game.running) return
+
+  // Prevenir el comportamiento por defecto de las flechas
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+    e.preventDefault()
+  }
+
+  switch (e.key) {
+    case "ArrowUp":
+      if (game.direction.y === 0) game.direction = { x: 0, y: -20 }
+      break
+    case "ArrowDown":
+      if (game.direction.y === 0) game.direction = { x: 0, y: 20 }
+      break
+    case "ArrowLeft":
+      if (game.direction.x === 0) game.direction = { x: -20, y: 0 }
+      break
+    case "ArrowRight":
+      if (game.direction.x === 0) game.direction = { x: 20, y: 0 }
+      break
+    case " ":
+      game.paused = !game.paused
+      break
+  }
+})
+
+// Mejorar la función openSnakeGame para dar foco al juego
+function openSnakeGame() {
+  miniGame.classList.add("active")
+  // Dar foco al canvas del juego
+  gameCanvas.focus()
+  gameCanvas.tabIndex = 0 // Hacer el canvas focuseable
+  initGame()
+}
+
+// Mejorar la función closeSnakeGame
+function closeSnakeGame() {
+  miniGame.classList.remove("active")
+  game.running = false
+  // Remover el foco del canvas
+  gameCanvas.blur()
+}
+
+// Agregar event listener específico al canvas del juego
+gameCanvas.addEventListener("keydown", (e) => {
+  if (!game.running) return
+
+  // Prevenir el comportamiento por defecto
+  e.preventDefault()
+  e.stopPropagation()
+
+  switch (e.key) {
+    case "ArrowUp":
+      if (game.direction.y === 0) game.direction = { x: 0, y: -20 }
+      break
+    case "ArrowDown":
+      if (game.direction.y === 0) game.direction = { x: 0, y: 20 }
+      break
+    case "ArrowLeft":
+      if (game.direction.x === 0) game.direction = { x: -20, y: 0 }
+      break
+    case "ArrowRight":
+      if (game.direction.x === 0) game.direction = { x: 20, y: 0 }
+      break
+    case " ":
+      game.paused = !game.paused
+      break
+  }
+})
+
+function initGame() {
+  game.snake = [{ x: 200, y: 200 }]
+  game.direction = { x: 20, y: 0 } // Cambiar para que empiece moviéndose
+  game.score = 0
+  game.running = true
+  game.paused = false
+  gameScore.textContent = game.score
+  generateFood()
+  gameLoop()
+}
+
+function generateFood() {
+  game.food = {
+    x: Math.floor(Math.random() * 20) * 20,
+    y: Math.floor(Math.random() * 20) * 20,
+  }
+}
+
+function gameLoop() {
+  if (!game.running) return
+
+  if (!game.paused) {
+    update()
+    draw()
+  }
+
+  setTimeout(gameLoop, 150)
+}
+
+function update() {
+  const head = { x: game.snake[0].x + game.direction.x, y: game.snake[0].y + game.direction.y }
+
+  // Check walls
+  if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
+    gameOver()
+    return
+  }
+
+  // Check self collision
+  for (const segment of game.snake) {
+    if (head.x === segment.x && head.y === segment.y) {
+      gameOver()
+      return
+    }
+  }
+
+  game.snake.unshift(head)
+
+  // Check food
+  if (head.x === game.food.x && head.y === game.food.y) {
+    game.score += 10
+    gameScore.textContent = game.score
+    generateFood()
+  } else {
+    game.snake.pop()
+  }
+}
+
+function draw() {
+  // Clear canvas
+  game.ctx.fillStyle = "#0a0a0a"
+  game.ctx.fillRect(0, 0, 400, 400)
+
+  // Draw snake
+  game.ctx.fillStyle = "#00ff88"
+  for (const segment of game.snake) {
+    game.ctx.fillRect(segment.x, segment.y, 18, 18)
+  }
+
+  // Draw food
+  game.ctx.fillStyle = "#ff0080"
+  game.ctx.fillRect(game.food.x, game.food.y, 18, 18)
+}
+
+function gameOver() {
+  game.running = false
+  alert(`¡Game Over! Puntuación: ${game.score}`)
+}
+
+// Enhanced Parallax
+function updateParallax() {
+  const scrolled = window.pageYOffset
+  const parallaxElements = document.querySelectorAll(".parallax-element")
+
+  parallaxElements.forEach((element, index) => {
+    const speed = 0.5 + index * 0.1
+    const yPos = -(scrolled * speed)
+    element.style.transform = `translateY(${yPos}px)`
+  })
+}
+
+window.addEventListener("scroll", updateParallax)
+
+// Section Transitions
+const sectionObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible")
+      }
+    })
+  },
+  { threshold: 0.1 },
+)
+
+document.querySelectorAll("section").forEach((section) => {
+  section.classList.add("section-transition")
+  sectionObserver.observe(section)
+})
+
+// Lazy Loading
+const lazyObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("loaded")
+      lazyObserver.unobserve(entry.target)
+    }
+  })
+})
+
+document.querySelectorAll(".lazy-load").forEach((element) => {
+  lazyObserver.observe(element)
+})
+
+// GitHub Stats Animation (simulated)
+function animateGitHubStats() {
+  const stats = [
+    { id: "github-repos", target: 12 },
+    { id: "github-commits", target: 156 },
+    { id: "github-stars", target: 23 },
+    { id: "github-followers", target: 8 },
+  ]
+
+  stats.forEach((stat) => {
+    const element = document.getElementById(stat.id)
+    let current = 0
+    const increment = stat.target / 50
+
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= stat.target) {
+        current = stat.target
+        clearInterval(timer)
+      }
+      element.textContent = Math.floor(current)
+    }, 50)
+  })
+}
+
+// Trigger GitHub stats animation when section is visible
+const githubSection = document.getElementById("github-stats")
+if (githubSection) {
+  const githubObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        animateGitHubStats()
+        githubObserver.unobserve(entry.target)
+      }
+    })
+  })
+  githubObserver.observe(githubSection)
+}
+
+// Keyboard shortcuts info
+document.addEventListener("DOMContentLoaded", () => {
+  console.log(`
+    🎮 ATAJOS DE TECLADO:
+    ⌨️  T - Abrir Terminal
+    ⌨️  M - Modo Matrix
+    ⌨️  ESC - Cerrar ventanas
+    🐍 Flechas - Controlar Snake
+    ⏸️  ESPACIO - Pausar juego
+  `)
 })
 
 // Console easter egg
